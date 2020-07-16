@@ -1,0 +1,25 @@
+Generator:
+    Channels: 512
+    Kernel_Size: 7
+    Upsample_Scales: [8, 8, 2, 2]
+    Residual_Stack:
+        Stacks: 3
+        Kernel_Size: 3
+
+Discriminator:
+    Count: 3
+    Pooling:
+        Kernel_Size: 4
+        Stride: 2
+        Padding: 1
+    First:
+        Channels: [16]
+        Kernel_Size: [15]
+    Downsample:
+        Channels: [64, 256, 1024, 1024]
+        Kernel_Size: [41, 41, 41, 41]
+        Stride: [4, 4, 4, 4]
+        Group: [4, 16, 64, 1024]
+    Last:
+        Channels: [5, 3]
+        Kernel_Size: [1024, 1]  # Last must be 1.

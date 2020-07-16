@@ -1,0 +1,66 @@
+Sound:
+    Spectrogram_Dim: 1025
+    Mel_Dim: 80
+    Frame_Length: 1024
+    Frame_Shift: 256
+    # Sample_Rate: 24000
+    Sample_Rate: 16000
+    Mel_F_Min: 125
+    Mel_F_Max: 7600
+    Max_Abs_Mel: 4
+
+Generator: 'PWGAN'
+Discriminator: 'MelGAN'
+
+
+STFT_Loss_Resolution:
+    FFT_Sizes: [1024, 2048, 512]
+    Shfit_Lengths: [120, 240, 50]
+    Win_Lengths: [600, 1200, 240]
+
+Train:
+    Use_Pattern_Cache: false
+    # Pattern_Path: 'C:/Pattern/Vocoder.24K.Pattern.VCTKLibri'
+    Train_Pattern:
+        Path: 'C:/Pattern/GlowTTS.SR16K.Pattern/Train'
+        Metadata_File: 'METADATA.PICKLE'
+        Accumulated_Dataset_Epoch: 1   # This is to prevent slow down from torch.utils.data.DataLoader when the number of patterns is small.
+    Eval_Pattern:
+        Path: 'C:/Pattern/GlowTTS.SR16K.Pattern/Eval'
+        Metadata_File: 'METADATA.PICKLE'
+    Num_Workers: 2
+    Batch_Size: 6
+    Wav_Length: 25600
+    Max_Pattern_Queue: 100
+    Learning_Rate:
+        Discriminator: 
+            Initial: 5.0e-5
+            Epsilon: 1.0e-6
+            Decay_Step: 200000
+            Decay_Rate: 0.5
+        Generator:
+            Initial: 1.0e-4
+            Epsilon: 1.0e-6
+            Decay_Step: 200000
+            Decay_Rate: 0.5
+    Adversarial_Weight: 4.0
+    Discriminator_Delay: 100000
+    ADAM:
+        Beta1: 0.9
+        Beta2: 0.999
+        Epsilon: 1.0e-7
+    Generator_Gradient_Norm: 10.0
+    Discriminator_Gradient_Norm: 1.0
+    Max_Step: 400000
+    Checkpoint_Save_Interval: 1000
+    Logging_Interval: 100
+    Evaluation_Interval: 1000
+    Inference_Interval: 1000
+    Initial_Inference: false
+
+Inference_Batch_Size: 4 #null
+Inference_Path: 'D:/PWGAN.Results/SR16K.Results.VCTKLibri/Inference'
+Checkpoint_Path: 'D:/PWGAN.Results/SR16K.Results.VCTKLibri/Checkpoint'
+Log_Path: 'D:/PWGAN.Results/SR16K.Results.VCTKLibri/Log'
+Use_Mixed_Precision: true  # apex is required.
+Device: '-1'

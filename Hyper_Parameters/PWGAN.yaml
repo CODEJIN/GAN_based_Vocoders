@@ -1,0 +1,17 @@
+Generator:
+    Residual_Channels: 64
+    ResConvGLU:
+        Blocks: 3
+        Stacks_in_Block: 10
+        Gate_Channels: 128
+        Kernel_Size: 3
+        Skip_Channels: 64
+        Dropout_Rate: 0.0
+    Upsample:
+        Scales: [4, 4, 4, 4]
+        Pad: 2
+
+Discriminator:
+    Stacks: 10
+    Channels: 64
+    Kernel_Size: 3
