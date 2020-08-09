@@ -1,6 +1,6 @@
-# GAN_based_Vocoders
+# Vocoders based on GAN
 
-This code is a replication code of [kan-bayashi's code](https://github.com/kan-bayashi/ParallelWaveGAN). I wrote this code for my independent study about PyTorch. If you want to use Parallel WaveGAN model, I recommend that you refer to the original kan-bayashi's code.
+Currently, this repository is a replication of [kan-bayashi's code](https://github.com/kan-bayashi/ParallelWaveGAN). I wrote this code for my independent study about PyTorch. If you want to use Parallel WaveGAN model, I recommend that you refer to the original kan-bayashi's code.
 
 The following is the paper I referred:
 ```
