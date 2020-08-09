@@ -12,13 +12,13 @@ class MultiResolutionSTFTLoss(torch.nn.Module):
         window= torch.hann_window
         ):
         super(MultiResolutionSTFTLoss, self).__init__()
+        self.layer_Dict = torch.nn.ModuleDict()
 
         for index, (fft_Size, shift_Length, win_Length) in enumerate(zip(
             fft_sizes,
             shift_lengths,
             win_lengths
-            )):
-            self.layer_Dict = torch.nn.ModuleDict()
+            )):            
             self.layer_Dict['STFTLoss_{}'.format(index)] = STFTLoss(
                 fft_size= fft_Size,
                 shift_length= shift_Length,

@@ -66,6 +66,16 @@ def Pattern_Generate(path, top_db= 60):
 def Pattern_File_Generate(path, speaker_ID, speaker, dataset, text= None, tag='', eval= False):
     pattern_Path = hp_Dict['Train']['Eval_Pattern' if eval else 'Train_Pattern']['Path']
 
+    file = '{}.{}{}.PICKLE'.format(
+        speaker if dataset.upper() in speaker.upper() else '{}.{}'.format(dataset, speaker),
+        '{}.'.format(tag) if tag != '' else '',
+        os.path.splitext(os.path.basename(path))[0]
+        ).upper()
+    file = os.path.join(pattern_Path, dataset, speaker, file).replace("\\", "/")
+
+    if os.path.exists(file):
+        return
+
     try:
         audio, mel, pitch = Pattern_Generate(path, top_DB_Dict[dataset])
         assert mel.shape[0] == pitch.shape[0], 'Mel_shape != Pitch_shape {} != {}'.format(mel.shape, pitch.shape)
@@ -83,14 +93,8 @@ def Pattern_File_Generate(path, speaker_ID, speaker, dataset, text= None, tag=''
         print('Error: {} in {}'.format(e, path))
         return
 
-    file = '{}.{}{}.PICKLE'.format(
-        speaker if dataset in speaker else '{}.{}'.format(dataset, speaker),
-        '{}.'.format(tag) if tag != '' else '',
-        os.path.splitext(os.path.basename(path))[0]
-        ).upper()
-
-    os.makedirs(os.path.join(pattern_Path, dataset).replace('\\', '/'), exist_ok= True)
-    with open(os.path.join(pattern_Path, dataset, file).replace("\\", "/"), 'wb') as f:
+    os.makedirs(os.path.join(pattern_Path, dataset, speaker).replace('\\', '/'), exist_ok= True)
+    with open(file, 'wb') as f:
         pickle.dump(new_Pattern_Dict, f, protocol=4)
 
 
@@ -203,7 +207,9 @@ def VCTK_Info_Load(path, use_text= False):
         for path in paths:
             if 'p315'.upper() in path.upper():  #Officially, 'p315' text is lost in VCTK dataset.
                 continue
-            text_Dict[path] = Text_Filtering(open(path.replace('wav48', 'txt').replace('wav', 'txt'), 'r').readlines()[0])
+            text = Text_Filtering(open(path.replace('wav48', 'txt').replace('wav', 'txt'), 'r').readlines()[0])
+            if not text is None:
+                text_Dict[path] = text
         paths = list(text_Dict.keys())
 
     speaker_Dict = {
@@ -272,12 +278,17 @@ def Metadata_Generate(eval= False, use_text= False):
     if use_text:
         new_Metadata_Dict['Text_Length_Dict'] = {}
 
+    files_TQDM = tqdm(
+        total= sum([len(files) for root, _, files in os.walk(pattern_Path)]),
+        desc= 'Eval_Pattern' if eval else 'Train_Pattern'
+        )
+
     for root, _, files in os.walk(pattern_Path):
         for file in files:
             with open(os.path.join(root, file).replace("\\", "/"), "rb") as f:
                 pattern_Dict = pickle.load(f)
 
-            file = os.path.join(os.path.basename(root), file).replace("\\", "/")
+            file = os.path.join(root, file).replace("\\", "/").replace(pattern_Path, '').lstrip('/')
             try:
                 if not all([
                     key in ('Audio', 'Mel', 'Pitch', 'Speaker_ID', 'Speaker', 'Dataset', 'Text' if use_text else '')
@@ -295,6 +306,7 @@ def Metadata_Generate(eval= False, use_text= False):
                     new_Metadata_Dict['Text_Length_Dict'][file] = len(pattern_Dict['Text'])
             except:
                 print('File \'{}\' is not correct pattern file. This file is ignored.'.format(file))
+            files_TQDM.update(1)
 
     with open(os.path.join(pattern_Path, metadata_File.upper()).replace("\\", "/"), 'wb') as f:
         pickle.dump(new_Metadata_Dict, f, protocol= 4)
@@ -304,21 +316,13 @@ def Metadata_Generate(eval= False, use_text= False):
 def Token_Dict_Generate(text_Dict):
     tokens = set()
     for text in text_Dict.values():
-        tokens = tokens.union(set(text))    
+        tokens = tokens.union(set(text))
 
     os.makedirs(os.path.dirname(hp_Dict['Token_Path']), exist_ok= True)
-    #I don't use yaml.dump in this case to sort clearly.
     yaml.dump(
         {token: index for index, token in enumerate(['<S>', '<E>'] + sorted(tokens))},
         open(hp_Dict['Token_Path'], 'w')
         )
-    
-    # #I don't use yaml.dump in this case to sort clearly.
-    # os.makedirs(os.path.dirname(hp_Dict['Token_Path']), exist_ok= True)
-    # open(hp_Dict['Token_Path'], 'w').write('\n'.join([
-    #     '\'{}\': {}'.format(token, index)
-    #     for index, token in enumerate(['<S>', '<E>'] + sorted(tokens))
-    #     ]))
 
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
@@ -432,5 +436,5 @@ if __name__ == '__main__':
 
 
 # python Pattern_Generator.py -lj "D:\Pattern\ENG\LJSpeech" -bc2013 "D:\Pattern\ENG\BC2013" -cmua "D:\Pattern\ENG\CMUA" -vctk "D:\Pattern\ENG\VCTK" -libri "D:\Pattern\ENG\LibriTTS"
-# python Pattern_Generator.py -vctk "D:\Pattern\ENG\VCTK" -libri "D:\Pattern\ENG\LibriTTS"
+# python Pattern_Generator.py -lj "D:\Pattern\ENG\LJSpeech" -vctk "D:\Pattern\ENG\VCTK" -libri "D:\Pattern\ENG\LibriTTS" -text
 # python Pattern_Generator.py -lj "D:\Pattern\ENG\LJSpeech" -text

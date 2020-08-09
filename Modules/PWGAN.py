@@ -51,7 +51,7 @@ class Generator(torch.nn.Module):
 
         self.apply_weight_norm()
         
-    def forward(self, x, auxs):        
+    def forward(self, x, auxs):
         auxs = self.layer_Dict['Upsample'](auxs)
 
         x = self.layer_Dict['First'](x)

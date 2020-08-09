@@ -8,9 +8,12 @@ Sound:
     Mel_F_Min: 125
     Mel_F_Max: 7600
     Max_Abs_Mel: 4
+    Confidence_Threshold: 0.6
+    Gaussian_Smoothing_Sigma: 0.0
+    Quantinized_Pitch_Dim: 256
 
 Generator: 'PWGAN'
-Discriminator: 'MelGAN'
+Discriminator: 'MelGAN'  # 'PWGAN', 'MelGAN'
 
 
 STFT_Loss_Resolution:
@@ -18,15 +21,16 @@ STFT_Loss_Resolution:
     Shfit_Lengths: [120, 240, 50]
     Win_Lengths: [600, 1200, 240]
 
+
+# Token_Path: 'C:/Pattern/16K.Pattern.LJVCTKLibri/Token.yaml'   #It is not used in vocoder models.
 Train:
     Use_Pattern_Cache: false
-    # Pattern_Path: 'C:/Pattern/Vocoder.24K.Pattern.VCTKLibri'
     Train_Pattern:
-        Path: 'C:/Pattern/GlowTTS.SR16K.Pattern/Train'
+        Path: 'C:/Pattern/16K.Pattern.LJVCTKLibri/Train'
         Metadata_File: 'METADATA.PICKLE'
         Accumulated_Dataset_Epoch: 1   # This is to prevent slow down from torch.utils.data.DataLoader when the number of patterns is small.
     Eval_Pattern:
-        Path: 'C:/Pattern/GlowTTS.SR16K.Pattern/Eval'
+        Path: 'C:/Pattern/16K.Pattern.LJVCTKLibri/Eval'
         Metadata_File: 'METADATA.PICKLE'
     Num_Workers: 2
     Batch_Size: 6
@@ -43,7 +47,7 @@ Train:
             Epsilon: 1.0e-6
             Decay_Step: 200000
             Decay_Rate: 0.5
-    Adversarial_Weight: 4.0
+    Adversarial_Weight: 0.25
     Discriminator_Delay: 100000
     ADAM:
         Beta1: 0.9
@@ -56,11 +60,11 @@ Train:
     Logging_Interval: 100
     Evaluation_Interval: 1000
     Inference_Interval: 1000
-    Initial_Inference: false
+    Initial_Inference: true
 
-Inference_Batch_Size: 4 #null
-Inference_Path: 'D:/PWGAN.Results/SR16K.Results.VCTKLibri/Inference'
-Checkpoint_Path: 'D:/PWGAN.Results/SR16K.Results.VCTKLibri/Checkpoint'
-Log_Path: 'D:/PWGAN.Results/SR16K.Results.VCTKLibri/Log'
+Inference_Batch_Size: 1 #null
+Inference_Path: 'D:/GAN_based_Vocoder.Results/PW_Mel.SR16K.Results.VCTKLibri/Inference'
+Checkpoint_Path: 'D:/GAN_based_Vocoder.Results/PW_Mel.SR16K.Results.VCTKLibri/Checkpoint'
+Log_Path: 'D:/GAN_based_Vocoder.Results/PW_Mel.SR16K.Results.VCTKLibri/Log'
 Use_Mixed_Precision: true  # apex is required.
-Device: '-1'
+Device: '1'

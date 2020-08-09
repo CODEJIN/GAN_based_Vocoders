@@ -21,9 +21,9 @@ Generator = importlib.import_module('Modules.{}'.format(hp_Dict['Generator'])).G
 Discriminator = importlib.import_module('Modules.{}'.format(hp_Dict['Discriminator'])).Discriminator
 
 with open('./Hyper_Parameters/{}.yaml'.format(hp_Dict['Generator'])) as f:
-    hp_Dict['Generator'] = yaml.load(f, Loader=yaml.Loader)
+    hp_Dict['Generator'] = yaml.load(f, Loader=yaml.Loader)['Generator']
 with open('./Hyper_Parameters/{}.yaml'.format(hp_Dict['Discriminator'])) as f:
-    hp_Dict['Discriminator'] = yaml.load(f, Loader=yaml.Loader)
+    hp_Dict['Discriminator'] = yaml.load(f, Loader=yaml.Loader)['Discriminator']
 
 
 if not hp_Dict['Device'] is None:
@@ -188,7 +188,7 @@ class Trainer:
         else:
             loss_Dict['Generator'].backward()
         torch.nn.utils.clip_grad_norm_(
-            parameters= amp.master_params(self.model_Dict['Generator'].parameters()),
+            parameters= amp.master_params(self.optimizer_Dict['Generator']),
             max_norm= hp_Dict['Train']['Generator_Gradient_Norm']
             )
         self.optimizer_Dict['Generator'].step()
@@ -223,7 +223,7 @@ class Trainer:
             else:
                 loss_Dict['Discriminator'].backward()
             torch.nn.utils.clip_grad_norm_(
-                parameters= amp.master_params(self.model_Dict['Discriminator'].parameters()),
+                parameters= amp.master_params(self.optimizer_Dict['Discriminator']),
                 max_norm= hp_Dict['Train']['Discriminator_Gradient_Norm']
                 )
             self.optimizer_Dict['Discriminator'].step()
@@ -411,13 +411,19 @@ class Trainer:
         state_Dict = torch.load(path, map_location= 'cpu')
 
         self.model_Dict['Generator'].load_state_dict(state_Dict['Model']['Generator'])
-        self.model_Dict['Discriminator'].load_state_dict(state_Dict['Model']['Discriminator'])
-        
         self.optimizer_Dict['Generator'].load_state_dict(state_Dict['Optimizer']['Generator'])
-        self.optimizer_Dict['Discriminator'].load_state_dict(state_Dict['Optimizer']['Discriminator'])
-
         self.scheduler_Dict['Generator'].load_state_dict(state_Dict['Scheduler']['Generator'])
-        self.scheduler_Dict['Discriminator'].load_state_dict(state_Dict['Scheduler']['Discriminator'])
+
+        try:
+            self.model_Dict['Discriminator'].load_state_dict(state_Dict['Model']['Discriminator'])
+            self.optimizer_Dict['Discriminator'].load_state_dict(state_Dict['Optimizer']['Discriminator'])
+            self.scheduler_Dict['Discriminator'].load_state_dict(state_Dict['Scheduler']['Discriminator'])
+        except:
+            logging.warning(
+                'In checkpoint file, there is no information of current mdoel.'
+                'This warning may occur when discriminator model is incompatible.'
+                'Only generator information is loaded.'
+                )
         
         self.steps = state_Dict['Steps']
         self.epochs = state_Dict['Epochs']
@@ -469,6 +475,7 @@ class Trainer:
 
         if hp_Dict['Train']['Initial_Inference']:
             self.Evaluation_Epoch()
+            self.Inference_Epoch()
 
         while self.steps < hp_Dict['Train']['Max_Step']:
             try:
