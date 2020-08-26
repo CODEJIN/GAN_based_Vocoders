@@ -128,7 +128,7 @@ class Inferencer:
         mel_Path,
         stop_Path= None,
         result_Path= './results',
-        batch_Size= hp_Dict['Train']['Batch_Size']
+        batch_Size= hp_Dict['Inference_Batch_Size']
         ):
         logging.info('Mel-spectrogram path: {}'.format(mel_Path))
         logging.info('Result save path: {}'.format(result_Path))
@@ -162,6 +162,7 @@ if __name__ == '__main__':
     argParser.add_argument('-m', '--mel', required= True)
     argParser.add_argument('-s', '--stop', default= None)
     argParser.add_argument('-r', '--result', default='./results')
+    argParser.add_argument('-b', '--batch', default= hp_Dict['Inference_Batch_Size'])
     argParser.add_argument('-gpu', '--gpu', default='-1')
     args = argParser.parse_args()
 
@@ -181,4 +182,5 @@ if __name__ == '__main__':
         result_Path= args.result
         )
 
-# python Inference.py -c "D:/GAN_based_Vocoder.Results/PWGAN.SR24K.Results.VCTKLibri/Checkpoint/S_400000.pkl" -m "D:/GoogleDrive/Colab_Test/Pitchtron/Pitchtron.Results/SR24K.Results.Debugging.Enc/Inference/Step-11000/NPY/Mel" -r D:/TTT -gpu -1
+# python Inference.py -c "D:/GAN_based_Vocoder.Results/PWGAN.SR24K.Results.VCTKLibri/Checkpoint/S_400000.pkl" -m "D:\GoogleDrive\Colab_Test\Pitchtron\Pitchtron.Results\SR24K.Results.Debugging.LSSMA.GST.LJVCTK\Inference\Step-26000\NPY" -r D:/TTT -gpu 0
+# python Inference.py -c "D:/GAN_based_Vocoder.Results/PWGAN.SR24K.Results.VCTKLibri/Checkpoint/S_400000.pkl" -m "D:\GoogleDrive\Colab_Test\Pitchtron\Pitchtron.Results\SR24K.Results.Debugging.LSSMA.Pitchtron.LJVCTK.ADV_01\Inference\Step-34000\NPY\Mel" -r D:/Pitchtron.LSSAM -gpu 0
