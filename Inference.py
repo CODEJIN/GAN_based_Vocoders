@@ -61,6 +61,10 @@ class Collater:
         lengths = [mel.shape[0] * hp_Dict['Sound']['Frame_Shift'] for mel in mels]
         
         mels = [
+            np.clip(mel, -hp_Dict['Sound']['Max_Abs_Mel'], hp_Dict['Sound']['Max_Abs_Mel'])
+            for mel in mels
+            ]
+        mels = [
             np.pad(mel, [[self.upsample_Pad, self.upsample_Pad], [0, 0]], 'reflect')
             for mel in mels
             ]
@@ -90,7 +94,6 @@ class Inferencer:
     def Inference_Step(self, mels, noises, lengths, stops, files, result_Path):
         mels = mels.to(device)
         noises = noises.to(device)
-        mels.clamp_(min= -hp_Dict['Sound']['Max_Abs_Mel'], max= hp_Dict['Sound']['Max_Abs_Mel'])
         
         fakes = self.model(noises, mels).cpu().numpy()
         for mel, fake, stop, file in zip(mels.cpu().numpy(), fakes, stops, files):
